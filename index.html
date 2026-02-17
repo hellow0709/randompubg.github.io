@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>PUBG Random Slot</title>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    background: #0e0e0e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.category-title {
+    font-size: 40px;
+    margin-bottom: 20px;
+    font-family: 'Bangers', cursive;
+    letter-spacing: 3px;
+}
+
+.slot-wrapper {
+    width: 360px;
+    height: 360px;
+    overflow: hidden;
+    border-radius: 20px;
+    border: 4px solid #ffffff;
+    position: relative;
+    background: #000;
+}
+
+.slot-wrapper.win {
+    box-shadow: 0 0 25px rgba(46,204,113,0.4);
+    border-color: #2ecc71;
+}
+
+.slot {
+    position: relative;
+}
+
+.item {
+    width: 360px;
+    height: 360px;
+    position: relative;
+}
+
+.item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #111;
+}
+
+.item span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bangers', cursive;
+    font-size: 42px;
+    color: white;
+    text-shadow: 0 0 15px rgba(0,0,0,0.9);
+    text-align: center;
+    width: 90%;
+}
+
+button {
+    margin-top: 30px;
+    padding: 14px 50px;
+    font-size: 30px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'Bangers', cursive;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#spinBtn {
+    background: #ffcc00;
+    box-shadow: 0 6px 0 #cc9900;
+}
+
+#nextBtn {
+    background: #2ecc71;
+    color: white;
+    box-shadow: 0 6px 0 #1e9e52;
+    display: none;
+}
+
+.result-page {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+}
+
+.result-items {
+    display: flex;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.result-item {
+    width: 250px;
+    height: 250px;
+    background: #111;
+    border-radius: 15px;
+    border: 3px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.result-item img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.result-item span {
+    margin-top: 10px;
+    font-family: 'Bangers', cursive;
+    font-size: 28px;
+}
+
+#restartBtn {
+    margin-top: 40px;
+    background: #ff4444;
+    color: white;
+    box-shadow: 0 6px 0 #aa2222;
+}
+</style>
+</head>
+
+<body>
+
+<div class="stage" id="slotPage">
+    <div class="category-title" id="categoryTitle"></div>
+
+    <div class="slot-wrapper" id="wrapper">
+        <div class="slot" id="slot"></div>
+    </div>
+
+    <button id="spinBtn">SPIN!</button>
+    <button id="nextBtn">NEXT!</button>
+</div>
+
+<div class="result-page" id="resultPage">
+    <h1 style="font-family:'Bangers'; font-size:50px;">RESULT</h1>
+    <div class="result-items" id="resultItems"></div>
+    <button id="restartBtn">RESTART</button>
+</div>
+
+<script>
+
+const gunItems = [
+    { text: "AR", img: "https://i.namu.wiki/i/FwP5ILuYw6oiSthigPh5FTTI4BKFpnLKfRENskWMXPmWoLtz6XOCPneD14EahoEDkjoyOZAr2GRTEMhDJuOVvgWELjogEaw5BLv3g_iM5k105E3qJQY3FFPubaEPvKF0gxxZc-GwZRMxKrntHvuedA.webp" },
+    { text: "SMG", img: "https://i.namu.wiki/i/xHOba-GXKmPFYaB1KW4IjgvefFDBQ3co-UKEYoa20ICqI879xT62UFXYhoxL88QwynP9XY4GaS8X32p2aEEiLEiok38vj7Db-9WsR9allQBPFm4ZtdiD3DZ48a0OFR9z-T5ZyvZNyAZBzYRPrTBy4g.webp" },
+    { text: "DMR", img: "https://i.namu.wiki/i/468oVtI34uvBqaazEeastcgbxW0qVPu6YlUZJd84tqiZH977U-WU1dTqZvHxInaGgCCZZigIFgYeeM40rH1bwCUTFTsPjsLfSCMvcOhBtXnonbIMweAwU5u6-jRk3kHRCnDIT2s4dzeiTh6mSsGIfA.webp" },
+    { text: "SR", img: "https://i.namu.wiki/i/yVvhQsofVYwq-BRRRyjbPCrI43p6WxugONs9k0PMljMQ1LQE1Pe3LpFi3QqTwSU_RCBm3YpLt0Xyzy7SA1h1DKp32u3C2avou96q8zDJfcBG1ZRJtgtypH0eJpT_ZSeT4FBK86kH1mreNRNP6l0HcQ.webp" }
+];
+
+const healItems = [
+    { text: "붕대", img: "https://i.namu.wiki/i/xEcXNBynQmsCsspeL1G61GVGSdVq4WBNymukOp_i2XjacZtlH03qcJKYpL5ezxQPiUStheQ2a3vj9j1mrTI3yH9-N8h_Js2mgwLwqPVhlU5O0QEpQiQ8-fdgQrVnYAhrdGQA8C6XIi4LrzSTDdmqgA.webp" },
+    { text: "구급상자", img: "https://i.namu.wiki/i/3QJSWAdYQE3REd5K1PnE2l1TlEtC9wJ20ZgTcX482Ai7INGfuDDAkNeSL9FZjiV7E26h6vPEAVrCKYD0ny2_5bG51JbDURI3x6Kae3bwr-zQIx28ZbmcXXF8efUM7NigCWnxN-QS7usrKlEd4PrpGw.webp" },
+    { text: "의료용 키트", img: "https://i.namu.wiki/i/q06r8mgc45qLpnVI77gMrKZdeSNvHpN8PFmKorARbLqF1cIkicn6xa8xmOv5pUIQ-EwRcxDUrLEolHln9nqRCv8NHvv1om29O9FTNn8wkJNE_Sw67iYah0nVSRFSkXUulMPWkU_Y9qMgcNkfVSug1g.webp" },
+    { text: "에너지 드링크", img: "https://i.namu.wiki/i/4Idjgq3mFsyQe9CrgnKkjkaG3IYFgEkpA3Wq6P3WqBD8fTcFy2YOzX2VwQ7BejUaPdyW7Arv8XaXxWURyBGV8GPqPL5iJhszMc8uB5PTfVprgI5R61WZV7tT55p7hrYve-AIh76_HgtDQh3g1ZTa6Q.webp" },
+    { text: "진통제", img: "https://i.namu.wiki/i/unYzNdulggUeG84tE0efKB03dRvnE612pEmVwOH0nI6qwn-Vq_umCZMHpdFdmgVxpqGrX6Lp1GFMPugXGQUPKtCBqLjpp_J1Bh3Zc4iuNxnxsb_umOafz3Iyi2LY7T7er5JFSs1u36yBFWYRBGOgEw.webp" },
+    { text: "주사기", img: "https://i.namu.wiki/i/2a1RiPycoRjZMzkXn1hAq-hxt-rXS0L_OempfvDLInRjpzhzv6DC2UCisnOW4tSxjR6AxwSSyYVLhxKz-WyuZ_jJjVrmfreEBJjnPaM9VHPeFzI-qesc6OWlLCUiDrTizDG2CRIG8pZIZIdmbI-A3w.webp" }
+];
+
+const throwItems = [
+    { text: "수류탄", img: "https://i.namu.wiki/i/clI4qMMZrGlNrtJbpjSnf3mZ4IYmFDXIwI-IDSstCoSNMFcAmNYBiYWVI1JrL-C-6A3p7_UWq1EfxpQNZoIUOFaZYs2GWuv1m-ypcmC-r2h61KkXk-qy5KMIXCYQfLUlQPRejoAwF3Ni9laAZAUVTQ.webp" },
+    { text: "섬광탄", img: "https://i.namu.wiki/i/SR1nDEam-bxW52gCevkGuQd95hc7_HlaX6O-rDunx5GeA9Z61QHEMf4X2qZSIrOhPtczZC7NgpW2WkUFYQmfg3O2vevw7-2IX2JJuG9I8ur--UK3fv0K1MMa7tQKGtZbp_dvieCI-R829sTld7Nj8w.webp" },
+    { text: "연막탄", img: "https://i.namu.wiki/i/MzddLvJAsgQ3wT8iBmUcDDeF2kZsaN7DkkJb0qgfxo8Vrxvq6zbS_grzjH6ixMJN3bL9AeFPDHVf7corYvyUdHFFSSSsmesq_7DmMWyHg9i8Eh9R3jeDpZooVsauwdaiZVLoKE4jH7GCtbXk5-GWBw.webp" },
+    { text: "화염병", img: "https://i.namu.wiki/i/UD9KLMC7vtMoP_pNZEj-cAqx5Y0WQVQSlOQBEAhvf2MSBmwOOdlTYnsMTwfOgd5hGHuFSdtnsmiTTGfMf5W-BxF9-jvHL3imTIondx7cPS-PxaZzWzlgMCqLQTQdI0OeaxMD0eGY1TdYBJpqKsVpvQ.webp" }
+];
+
+const categories = [
+{ name:"총기", data:gunItems },
+{ name:"의료템", data:healItems },
+{ name:"투척무기", data:throwItems }
+];
+
+let categoryIndex = 0;
+let currentData = categories[0].data;
+let results = [];
+
+const size = 360;
+const loops = 15;
+let isSpinning = false;
+
+const slot = document.getElementById("slot");
+const wrapper = document.getElementById("wrapper");
+const spinBtn = document.getElementById("spinBtn");
+const nextBtn = document.getElementById("nextBtn");
+const categoryTitle = document.getElementById("categoryTitle");
+const resultPage = document.getElementById("resultPage");
+const slotPage = document.getElementById("slotPage");
+const resultItems = document.getElementById("resultItems");
+const restartBtn = document.getElementById("restartBtn");
+
+function createSlot(data){
+    slot.innerHTML="";
+    for(let i=0;i<loops;i++){
+        data.forEach(item=>{
+            const div=document.createElement("div");
+            div.className="item";
+            div.innerHTML=`<img src="${item.img}"><span>${item.text}</span>`;
+            slot.appendChild(div);
+        });
+    }
+}
+
+function spin(){
+    if(isSpinning) return;
+    isSpinning=true;
+
+    const total=currentData.length;
+    const targetIndex=Math.floor(Math.random()*total);
+    const selected=currentData[targetIndex];
+
+    const startY=8*total*size;
+    const endY=startY+(5*total+targetIndex)*size;
+
+    gsap.set(slot,{y:-startY});
+    gsap.to(slot,{
+        y:-endY,
+        duration:3,
+        ease:"power3.out",
+        onComplete:()=>{
+            wrapper.classList.add("win");
+            results[categoryIndex] = selected;
+            isSpinning=false;
+            nextBtn.style.display="inline-block";
+            spinBtn.disabled = true; // 🔥 SPIN 버튼 비활성화
+        }
+    });
+}
+
+function goNext(){
+    nextBtn.style.display="none";
+    wrapper.classList.remove("win");
+    spinBtn.disabled = false; // 🔥 다음 카테고리에서 다시 활성화
+
+    categoryIndex++;
+
+    if(categoryIndex >= categories.length){
+        showFinal();
+        return;
+    }
+
+    currentData = categories[categoryIndex].data;
+    categoryTitle.textContent = categories[categoryIndex].name;
+    createSlot(currentData);
+}
+
+function showFinal(){
+    slotPage.style.display="none";
+    resultPage.style.display="flex";
+    resultItems.innerHTML="";
+
+    results.forEach(item=>{
+        const div=document.createElement("div");
+        div.className="result-item";
+        div.innerHTML=`<img src="${item.img}"><span>${item.text}</span>`;
+        resultItems.appendChild(div);
+    });
+}
+
+function restartGame(){
+    results = [];
+    categoryIndex = 0;
+    currentData = categories[0].data;
+
+    resultItems.innerHTML="";
+    resultPage.style.display="none";
+    slotPage.style.display="flex";
+
+    categoryTitle.textContent = categories[0].name;
+    createSlot(currentData);
+
+    spinBtn.disabled = false; // 🔥 초기화 시 다시 활성화
+    nextBtn.style.display="none";
+}
+
+categoryTitle.textContent = categories[0].name;
+createSlot(currentData);
+
+spinBtn.addEventListener("click",spin);
+nextBtn.addEventListener("click",goNext);
+restartBtn.addEventListener("click",restartGame);
+
+</script>
+
+</body>
+</html>
