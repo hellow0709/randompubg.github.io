@@ -239,7 +239,7 @@ let currentData = categories[0].data;
 let results = [];
 
 const size = 360;
-const loops = 15;
+const loops = 150;
 let isSpinning = false;
 
 const slot = document.getElementById("slot");
@@ -284,7 +284,7 @@ function spin(){
 
     // 🔥 3. Y가 0인 까만 화면에서부터 자연스럽게 출발하도록 수정
     // 맨 앞의 빈 칸(+1)을 고려해서 타겟 위치 계산 (약 8바퀴 도는 위치)
-    const endY = (8 * total + targetIndex + 1) * size; 
+    const endY = (30 * total + targetIndex + 1) * size; 
 
     let lastPassedItem = 0;
 
