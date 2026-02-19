@@ -169,6 +169,43 @@ button:disabled {
 </div>
 
 <script>
+// Web Audio API 설정
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+// 1. 룰렛 한 칸 지나갈 때마다 나는 소리 (짧고 경쾌하게 수정)
+function playTick() {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime); // 주파수를 살짝 높여서 맑은 틱 소리로
+    osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.03);
+    gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.03);
+}
+
+// 2. 당첨 소리 (빰빠밤)
+function playWinSound() {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
+    osc.frequency.setValueAtTime(554.37, audioCtx.currentTime + 0.1); 
+    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2); 
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.3); 
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime + 0.4);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.0);
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 1.0);
+}
 
 const gunItems = [
     { text: "AR", img: "https://i.namu.wiki/i/FwP5ILuYw6oiSthigPh5FTTI4BKFpnLKfRENskWMXPmWoLtz6XOCPneD14EahoEDkjoyOZAr2GRTEMhDJuOVvgWELjogEaw5BLv3g_iM5k105E3qJQY3FFPubaEPvKF0gxxZc-GwZRMxKrntHvuedA.webp" },
@@ -223,7 +260,7 @@ function createSlot(data){
         data.forEach(item=>{
             const div=document.createElement("div");
             div.className="item";
-            div.innerHTML=`<img src="${item.img}"><span>${item.text}</span>`;
+            div.innerHTML = `<img src="${item.img}"><span>${item.text}</span>`;
             slot.appendChild(div);
         });
     }
@@ -240,17 +277,33 @@ function spin(){
     const startY=8*total*size;
     const endY=startY+(5*total+targetIndex)*size;
 
+    // 🔥 시작 위치를 기반으로 몇 번째 칸에서 시작하는지 계산
+    let lastPassedItem = Math.floor(startY / size);
+
     gsap.set(slot,{y:-startY});
     gsap.to(slot,{
         y:-endY,
         duration:3,
         ease:"power3.out",
+        onUpdate: function() {
+            // 🔥 애니메이션이 진행되는 동안 룰렛의 실시간 Y 위치 추적
+            const currentY = Math.abs(gsap.getProperty(slot, "y"));
+            const currentItem = Math.floor(currentY / size); // 현재 지나고 있는 칸 번호
+
+            // 🔥 새로운 칸으로 넘어갈 때만 '틱' 소리 재생
+            if (currentItem > lastPassedItem) {
+                playTick();
+                lastPassedItem = currentItem;
+            }
+        },
         onComplete:()=>{
+            playWinSound(); // 당첨 소리 재생
+
             wrapper.classList.add("win");
             results[categoryIndex] = selected;
             isSpinning=false;
             nextBtn.style.display="inline-block";
-            spinBtn.disabled = true; // 🔥 SPIN 버튼 비활성화
+            spinBtn.disabled = true;
         }
     });
 }
@@ -258,7 +311,7 @@ function spin(){
 function goNext(){
     nextBtn.style.display="none";
     wrapper.classList.remove("win");
-    spinBtn.disabled = false; // 🔥 다음 카테고리에서 다시 활성화
+    spinBtn.disabled = false;
 
     categoryIndex++;
 
@@ -280,7 +333,7 @@ function showFinal(){
     results.forEach(item=>{
         const div=document.createElement("div");
         div.className="result-item";
-        div.innerHTML=`<img src="${item.img}"><span>${item.text}</span>`;
+        div.innerHTML = `<img src="${item.img}"><span>${item.text}</span>`;
         resultItems.appendChild(div);
     });
 }
@@ -297,7 +350,7 @@ function restartGame(){
     categoryTitle.textContent = categories[0].name;
     createSlot(currentData);
 
-    spinBtn.disabled = false; // 🔥 초기화 시 다시 활성화
+    spinBtn.disabled = false;
     nextBtn.style.display="none";
 }
 
