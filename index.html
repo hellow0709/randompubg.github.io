@@ -172,13 +172,12 @@ button:disabled {
 // Web Audio API 설정
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// 1. 룰렛 한 칸 지나갈 때마다 나는 소리 (짧고 경쾌하게 수정)
 function playTick() {
     if(audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     osc.type = 'square';
-    osc.frequency.setValueAtTime(300, audioCtx.currentTime); // 주파수를 살짝 높여서 맑은 틱 소리로
+    osc.frequency.setValueAtTime(300, audioCtx.currentTime); 
     osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.03);
     gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime); 
     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
@@ -188,7 +187,6 @@ function playTick() {
     osc.stop(audioCtx.currentTime + 0.03);
 }
 
-// 2. 당첨 소리 (빰빠밤)
 function playWinSound() {
     if(audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
@@ -256,6 +254,13 @@ const restartBtn = document.getElementById("restartBtn");
 
 function createSlot(data){
     slot.innerHTML="";
+    
+    // 🔥 1. 맨 처음에 띄워둘 '완전 까만 빈 칸' 추가
+    const emptyDiv = document.createElement("div");
+    emptyDiv.className = "item";
+    emptyDiv.style.background = "#000"; // 검정 배경
+    slot.appendChild(emptyDiv);
+
     for(let i=0;i<loops;i++){
         data.forEach(item=>{
             const div=document.createElement("div");
@@ -264,6 +269,9 @@ function createSlot(data){
             slot.appendChild(div);
         });
     }
+    
+    // 🔥 2. 맨 위의 까만 빈 칸(Y: 0)이 보이도록 초기화
+    gsap.set(slot, {y: 0});
 }
 
 function spin(){
@@ -274,31 +282,27 @@ function spin(){
     const targetIndex=Math.floor(Math.random()*total);
     const selected=currentData[targetIndex];
 
-    const startY=8*total*size;
-    const endY=startY+(5*total+targetIndex)*size;
+    // 🔥 3. Y가 0인 까만 화면에서부터 자연스럽게 출발하도록 수정
+    // 맨 앞의 빈 칸(+1)을 고려해서 타겟 위치 계산 (약 8바퀴 도는 위치)
+    const endY = (8 * total + targetIndex + 1) * size; 
 
-    // 🔥 시작 위치를 기반으로 몇 번째 칸에서 시작하는지 계산
-    let lastPassedItem = Math.floor(startY / size);
+    let lastPassedItem = 0;
 
-    gsap.set(slot,{y:-startY});
     gsap.to(slot,{
         y:-endY,
         duration:3,
         ease:"power3.out",
         onUpdate: function() {
-            // 🔥 애니메이션이 진행되는 동안 룰렛의 실시간 Y 위치 추적
             const currentY = Math.abs(gsap.getProperty(slot, "y"));
-            const currentItem = Math.floor(currentY / size); // 현재 지나고 있는 칸 번호
+            const currentItem = Math.floor(currentY / size); 
 
-            // 🔥 새로운 칸으로 넘어갈 때만 '틱' 소리 재생
             if (currentItem > lastPassedItem) {
                 playTick();
                 lastPassedItem = currentItem;
             }
         },
         onComplete:()=>{
-            playWinSound(); // 당첨 소리 재생
-
+            playWinSound(); 
             wrapper.classList.add("win");
             results[categoryIndex] = selected;
             isSpinning=false;
@@ -322,6 +326,7 @@ function goNext(){
 
     currentData = categories[categoryIndex].data;
     categoryTitle.textContent = categories[categoryIndex].name;
+    // 다음 카테고리로 넘어가면 다시 까만 화면부터 시작
     createSlot(currentData);
 }
 
@@ -348,6 +353,7 @@ function restartGame(){
     slotPage.style.display="flex";
 
     categoryTitle.textContent = categories[0].name;
+    // 처음으로 돌아가면 다시 까만 화면 세팅
     createSlot(currentData);
 
     spinBtn.disabled = false;
