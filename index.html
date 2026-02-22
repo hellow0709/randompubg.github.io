@@ -338,9 +338,42 @@ function goNext(){
         return;
     }
 
-    currentData = categories[categoryIndex].data;
+    // 🔥 추가된 조건부 필터링 로직
+    if (categoryIndex === 1) { // 1은 '탄' 카테고리 순서입니다.
+        const selectedGun = results[0].text; // 뽑힌 총기 이름
+        let allowedAmmo = []; // 슬롯에 들어갈 탄약 목록
+        
+        // 총기별로 나올 수 있는 탄약을 지정합니다.
+        switch(selectedGun) {
+            case "AR": 
+                allowedAmmo = ["5.56mm", "7.62mm"]; 
+                break;
+            case "SMG": 
+                allowedAmmo = ["9mm"]; 
+                break;
+            case "SR": 
+                allowedAmmo = [".45 ACP", "7.62mm"]; 
+                break;
+            case "DMR": 
+                allowedAmmo = ["7.62mm", "9mm", "5.56mm"]; 
+                break;
+            case "권총": 
+                allowedAmmo = ["7.62mm", "9mm", "5.56mm", "12 게이지"]; 
+                break;
+            case "산탄총": 
+                allowedAmmo = ["12 게이지"]; 
+                break;
+        }
+        
+        // 전체 ammo 배열에서 조건에 맞는 탄약만 골라냅니다.
+        currentData = ammo.filter(item => allowedAmmo.includes(item.text));
+    } else {
+        // 탄 카테고리가 아니면 원래 설정된 데이터를 그대로 사용합니다.
+        currentData = categories[categoryIndex].data;
+    }
+
     categoryTitle.textContent = categories[categoryIndex].name;
-    // 다음 카테고리로 넘어가면 다시 까만 화면부터 시작
+    // 필터링된 데이터로 새 슬롯을 그립니다.
     createSlot(currentData);
 }
 
@@ -385,5 +418,4 @@ restartBtn.addEventListener("click",restartGame);
 
 </body>
 </html>
-
 
