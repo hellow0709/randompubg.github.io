@@ -214,6 +214,15 @@ const gunItems = [
     { text: "산탄총", img: "https://i.namu.wiki/i/vJrR2AcbLidaZrPHg-aMecF92rx0ICXWu-zwNgnYvwaNRzgFLZtAiOIc142iPtnyNEWhPFvsjgd2V_bGnHu2QYuSVEY7Lbb4L-JZeSeCN5uZVF_kRiSTtxRPLuAUlRIxCWrn9QYzDkUxKBNXK8HQHg.webp" },
 ];
 
+const ammo = [
+    { text: "5.56mm", img: "https://i.namu.wiki/i/xEcXNBynQmsCsspeL1G61GVGSdVq4WBNymukOp_i2XjacZtlH03qcJKYpL5ezxQPiUStheQ2a3vj9j1mrTI3yH9-N8h_Js2mgwLwqPVhlU5O0QEpQiQ8-fdgQrVnYAhrdGQA8C6XIi4LrzSTDdmqgA.webp" },
+    { text: "7.62mm", img: "https://i.namu.wiki/i/BWeOO-Y9IqpPLb4RVOf36QQqdiVBeifrtiR8HS4goLliyyfzlWrQr8zPYaEww-nSe1tY7PDKx1Cb4aGaV-6XU8fxePix2N4MlJ2iLlvU1RExR4-ka1C_j1vEPdhiWHOplsKYMxpIGt9tUJezBJkv-g.webp" },
+    { text: "9mm", img: "https://i.namu.wiki/i/kruACDUQP5z_kMaQQiO0poZWp372BKhMatXSu1CXlJvNfoa1xP5mi84x0SNLzF_ijU4XtbJEnIK4mHrfADw7i6oB4P4DXVIyCouU6TuuYa2cz9c9jBaRG3yJjwdnhhYWQ8Y0gQJv2CNV0L7ZY-eD4g.webp" },
+    { text: ".45 ACP", img: "https://i.namu.wiki/i/I7QTRbK0C15HW5rP_T6pQVKBqcekdzFmAmbSCnF6fOtSJ7QwB1nkcUlnLlDXziRKgfxweoDURztB61UjfhOf96V6Qo5R3PWDLib9OpnxCVpW4kxQRnbiRG84OmYtFTqlB5LYNx4TOhoJ61GT_DXY8A.webp" },
+    { text: "12 게이지", img: "https://i.namu.wiki/i/ZFviM2ftxypOUTZ5KacWK4rpAhHepR6Z4WSdfDYSPnAQj7hbaWPdZ2W5OR1O2mvy35HRRlGc0LzZVhvusFpocJyCnlFN6I8v9wVkNwDB27OSUqUXwoA30o6VGPlwSCmT78KQjWNWww-oqG4eXK8WVQ.webp" }
+];
+
+    
 const healItems = [
     { text: "붕대", img: "https://i.namu.wiki/i/xEcXNBynQmsCsspeL1G61GVGSdVq4WBNymukOp_i2XjacZtlH03qcJKYpL5ezxQPiUStheQ2a3vj9j1mrTI3yH9-N8h_Js2mgwLwqPVhlU5O0QEpQiQ8-fdgQrVnYAhrdGQA8C6XIi4LrzSTDdmqgA.webp" },
     { text: "구급상자", img: "https://i.namu.wiki/i/3QJSWAdYQE3REd5K1PnE2l1TlEtC9wJ20ZgTcX482Ai7INGfuDDAkNeSL9FZjiV7E26h6vPEAVrCKYD0ny2_5bG51JbDURI3x6Kae3bwr-zQIx28ZbmcXXF8efUM7NigCWnxN-QS7usrKlEd4PrpGw.webp" },
@@ -234,6 +243,7 @@ const throwItems = [
 
 const categories = [
 { name:"총기", data:gunItems },
+{ name:"탄", data:ammo },
 { name:"의료템(금지)", data:healItems },
 { name:"투척무기", data:throwItems }
 ];
@@ -375,4 +385,5 @@ restartBtn.addEventListener("click",restartGame);
 
 </body>
 </html>
+
 
